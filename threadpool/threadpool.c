@@ -1,40 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include "threadpool.h"
-
-
-struct threadpool {
-    int corePoolSize;   // 线程池基本大小。
-    int maxPoolSize;    // 线程池最大容量，大于这个就不会再创建线程了
-    int n;              // 线程池当前线程个数。
-    int idlNum;         // 空闲线程数
-    int busyNum;        // 忙碌线程数
-    job_queue_t *jobq;
-    pthread_t *threads;
-    pthread_mutex_t plock;
-    pthread_cond_t done;    
-    bool stop;         
-};
-
-struct job {
-    taskfn_t task;
-    void *arg;
-    struct job *next;
-};
-
-struct job_queue {
-    int maxJobSize;
-    int n;
-    pthread_mutex_t lock;
-    pthread_cond_t ready; 
-    job_t *head;
-    job_t *tail;
-};
-
 
 static void *thread_model(void *arg);
 static job_queue_t* job_queue_create(int maxJobSize);
-static int job_queue_destory(job_queue_t *jobq);
+static int job_queue_destroy(job_queue_t *jobq);
 static void err_exit(char *msg);
 
 
@@ -105,8 +76,8 @@ static job_queue_t* job_queue_create(int maxJobSize) {
     return jobq;
 }
 
-static int job_queue_destory(job_queue_t *jobq) {
-    if (tp == NULL) return 0;
+static int job_queue_destroy(job_queue_t *jobq) {
+    if (jobq == NULL) return 0;
 
     pthread_mutex_lock(&jobq->lock);
     job_t *job = jobq->head;
@@ -119,8 +90,8 @@ static int job_queue_destory(job_queue_t *jobq) {
     jobq->n = 0;
     pthread_mutex_unlock(&jobq->lock);
 
-    pthread_mutex_destory(&jobq->lock);
-    pthread_cond_destory(&jobq->ready);
+    pthread_mutex_destroy(&jobq->lock);
+    pthread_cond_destroy(&jobq->ready);
     return 0;
 }
 
@@ -131,13 +102,12 @@ int threadpool_init(threadpool_t *tp, int corePoolSize, int maxPoolSize, int max
     tp->maxPoolSize = maxPoolSize;
     tp->n = 0;
     tp->jobq = job_queue_create(maxJobSize);
-    tp->ready = 0;
     tp->stop = false;
 
-    if (pthread_mutex_init(tp->plock, NULL) != 0)
+    if (pthread_mutex_init(&tp->plock, NULL) != 0)
         err_exit("init mutex failed in threadpool!");
 
-    if (pthread_cond_t(tp->done, NULL) != 0)
+    if (pthread_cond_init(&tp->done, NULL) != 0)
         err_exit("init pthread_cond_t failed in threadpool!");
 
     tp->threads = (pthread_t *)malloc(sizeof(pthread_t) * maxPoolSize);
@@ -206,17 +176,18 @@ void threadpool_debug(threadpool_t *tp) {
     return;
 }
 
-int threadpool_destory(threadpool_t *tp) {
+int threadpool_destroy(threadpool_t *tp) {
     if (tp == NULL) return 0;
 
-    job_queue_destory(tp->jobq);
+    job_queue_destroy(tp->jobq);
 
     // cancle every thread
     for (int i = 0; i < tp->n; i++) {
         pthread_cancel(tp->threads[i]);
     } 
-    pthread_mutex_destory(&tp->plock);
-    pthread_cond_destory(&tp->done);
+
+    pthread_mutex_destroy(&tp->plock);
+    pthread_cond_destroy(&tp->done);
 
     tp->corePoolSize = 0;
     tp->maxPoolSize = 0;
