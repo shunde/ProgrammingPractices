@@ -7,6 +7,7 @@ private:
         else return _findMin_aux(nums, left, mid);
     }
 public:
+    // asume no duplicate 
     int findMin(vector<int>& nums) {
         return _findMin_aux(nums, 0, nums.size() - 1);
     }
