@@ -12,8 +12,9 @@ public:
            	   nextUgly = min(nextUgly, uglyNums[multiply[j]] * primes[j]);
            }
 
+           // update multiply index.
            for (int j = 0; j < k; j++) {
-           	   if (nextUgly == uglyNums[multiply[j]] * primes[j])
+           	   while (multiply[j] < i && uglyNums[multiply[j]] * primes[j] <= nextUgly)
            	   	    multiply[j]++;
            }
            uglyNums[i] = nextUgly;
