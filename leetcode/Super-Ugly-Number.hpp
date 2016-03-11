@@ -14,8 +14,8 @@ public:
 
            // update multiply index.
            for (int j = 0; j < k; j++) {
-           	   while (multiply[j] < i && uglyNums[multiply[j]] * primes[j] <= nextUgly)
-           	   	    multiply[j]++;
+           	  if (nextUgly == uglyNums[multiply[j]] * primes[j])
+                multiply[j]++;
            }
            uglyNums[i] = nextUgly;
        }
