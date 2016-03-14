@@ -83,12 +83,12 @@ skiplist* insertSkiplist(skiplist *sl, int value) {
 	for (int i = level - 1; i >= 0; i--) {
 		newNode->level[i].forward = update[i]->level[i].forward;
 		update[i]->level[i].forward = newNode;
-		newNode->backward = update[i];
-		if (newNode->level[i].forward) 
-			newNode->level[i].forward->backward = newNode;
+		
 	}
 
+	newNode->backward = (update[0] == sl->head)? NULL : update[0];
 	if (!newNode->level[0].forward) sl->tail = newNode;
+	else newNode->level[0].forward->backward = newNode;
 	
 	sl->length++;
 
