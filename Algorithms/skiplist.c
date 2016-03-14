@@ -98,13 +98,14 @@ skiplist* insertSkiplist(skiplist *sl, int value) {
 
 skiplistNode* findSkiplist(skiplist *sl, int value) {
 	if (!sl || !sl->head ) return NULL;
-	skiplistNode *next = sl->head;
+	skiplistNode *x = sl->head;
 	
 	for (int i = sl->high - 1; i >= 0; i--) {
-		while (next->level[i].forward && next->level[i].forward->value <= value)
-			next = next->level[i].forward;		
+		while (x->level[i].forward && x->level[i].forward->value < value)
+			x = x->level[i].forward;		
 	}
-	if (next->value == value) return next;
+	x = x->level[0].forward;
+	if (x && x->value == value) return x;
 	else return NULL;
 }
 
@@ -126,7 +127,7 @@ void printSkiplist(skiplist *sl) {
 
 int main(int argc, char* argv[]) {
 	skiplist *sl = createSkiplist();
-	int A[] = {9, 4, 3, 1, -2, 25, 32, 12, 2, 7, 6, 54, 100};
+	int A[] = {9, 4, 3, 1, -2, 25, 32, 12, 100, 2, 7, 6, 54, 100};
 	int B[] = {100, -2, 11, 25, 3, 54, 10, 6};
 
  	for (int i = 0; i < sizeof(A)/sizeof(A[0]); i++)
