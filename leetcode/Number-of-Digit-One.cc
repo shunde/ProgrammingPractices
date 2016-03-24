@@ -23,9 +23,8 @@ public:
                 iCount += (iHigherNum + 1) * factor;
                 break;
             }
-            factor *= 10;     // be aware of overflow.
+            factor *= 10;     // beware of overflow.
         }
-
         return iCount;
     }
 };
