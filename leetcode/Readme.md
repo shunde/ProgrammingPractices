@@ -1,5 +1,8 @@
 # Leetcode 解题集
 
+Leetcode Everyday, day day up!
+
+
 > 欢迎大家批评指正！
 
 ## Summary
