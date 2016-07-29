@@ -13,11 +13,17 @@ void usage(const char* fname) {
     printf("[usage] %s <streamNums> \n", fname);
 }
 
-struct BLK {
+struct blk_info {
     int idx;
-    int off_set;
+    int offset;
     int remain;
 };
+
+void init_blk(struct blk_info *blkptr, int idx, int offset, int remain) {
+    blkptr->idx = idx;
+    blkptr->offset = offset;
+    blkptr->remain = remain;
+}
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
@@ -31,7 +37,6 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-
     int fd;
     if ((fd = open("/dev/raw/raw1", O_RDWR)) == -1) {
         perror("fail to open /dev/raw/raw1");
@@ -42,6 +47,9 @@ int main(int argc, char* argv[]) {
     int alignment = 512;
     int bs = 4 * 1024;
 
+    int blk_bits = 22;   // 4MB
+    int blk_size = 1 << blk_bits;
+
     buf = memalign(alignment, bs);
     if (buf == NULL) {
         perror("fail to memalign.");
@@ -50,24 +58,38 @@ int main(int argc, char* argv[]) {
 
     memset(buf, 0x43, bs);
 
+    struct blk_info *blkptrs = (struct blk_info*)malloc(sizeof(struct blk_info) * streamNums);
+    if (blkptrs == NULL) {
+         perror("fail to malloc memory for blk_info tables");
+         return 0;
+    }
+
+    int free_blk_idx = 0;
+    for (int i = 0; i < streamNums; i++) {
+         init_blk(&blkptrs[i], free_blk_idx, 0, blk_size);
+         free_blk_idx += 1;
+    }
 
     // concurrent stream write
     long long bytesWrite = 0;
-    int bufsize = 4 * 1024;  // 4KB
-    int loops = 600;
+    int loops = blk_size / bs;
     struct timeval t1, t2;
     double elapsedTime;
 
     gettimeofday(&t1, NULL);
 
-    for (int i = 0; i < loops; i++) {
+    off_t offset;
 
+    for (int i = 0; i < loops; i++) {
         for (int j = 0; j < streamNums; j++) {
+            offset = (blkptrs[i].idx << blk_bits) + blkptrs[i].offset;
+            lseek(fd, offset, SEEK_SET);
             int nwrite = write(fd, buf, bs);
+            blkptrs[i].offset += nwrite;
+            // todo: 更新 remain
             bytesWrite += nwrite;
         }
     }
-
 
     gettimeofday(&t2, NULL);
 
