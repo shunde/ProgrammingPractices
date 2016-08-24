@@ -10,12 +10,12 @@
 
 
 void usage(const char* fname) {
-    printf("[usage] %s <streamNums> \n", fname);
+    printf("[usage] %s <streamNums> <bs_bit> <blk_bit>\n", fname);
 }
 
 struct blk_info {
     int idx;
-    int offset;
+    off_t offset;
     int remain;
 };
 
@@ -26,7 +26,7 @@ void init_blk(struct blk_info *blkptr, int idx, int offset, int remain) {
 }
 
 int main(int argc, char* argv[]) {
-    if (argc < 2) {
+    if (argc < 4) {
         usage(argv[0]);
         return 0;
     }
@@ -36,6 +36,10 @@ int main(int argc, char* argv[]) {
         printf("Invaid streamNums argument!\n");
         return 0;
     }
+    int bs_bits, blk_bits;
+    bs_bits = atoi(argv[2]);
+    blk_bits = atoi(argv[3]);
+
 
     int fd;
     if ((fd = open("/dev/raw/raw1", O_RDWR)) == -1) {
@@ -44,11 +48,12 @@ int main(int argc, char* argv[]) {
     }
 
     char* buf;
-    int alignment = 512;
-    int bs = 4 * 1024;
+    int alignment = 4096;
+    int bs = 1 << bs_bits;
 
-    int blk_bits = 22;   // 4MB
     int blk_size = 1 << blk_bits;
+   
+    printf("bufsize = %f KB, blksize = %f MB\n", bs/1024.0, blk_size*1.0/(1024*1024));
 
     buf = memalign(alignment, bs);
     if (buf == NULL) {
@@ -72,7 +77,8 @@ int main(int argc, char* argv[]) {
 
     // concurrent stream write
     long long bytesWrite = 0;
-    int loops = blk_size / bs;
+    int loops = 32 * 1024 * 1024 / bs;
+    //int loops = blk_size / bs;
     struct timeval t1, t2;
     double elapsedTime;
 
@@ -82,10 +88,10 @@ int main(int argc, char* argv[]) {
 
     for (int i = 0; i < loops; i++) {
         for (int j = 0; j < streamNums; j++) {
-            offset = (blkptrs[i].idx << blk_bits) + blkptrs[i].offset;
+            offset = (blkptrs[j].idx << blk_bits) + blkptrs[j].offset;
             lseek(fd, offset, SEEK_SET);
             int nwrite = write(fd, buf, bs);
-            blkptrs[i].offset += nwrite;
+            blkptrs[j].offset += nwrite;
             // todo: 更新 remain
             bytesWrite += nwrite;
         }
@@ -97,8 +103,8 @@ int main(int argc, char* argv[]) {
 
     double writeSpeed = bytesWrite / elapsedTime;
 
-    printf("Data write in Bytes: %lld (%f in MB)\n", bytesWrite, (double)bytesWrite/(1024*1024));
-    printf("Time duration: %f (sec)\n", elapsedTime);
+    printf("#Data write in Bytes: %lld (%f in MB)\n", bytesWrite, (double)bytesWrite/(1024*1024));
+    printf("#Time duration: %f (sec)\n", elapsedTime);
     printf("writespeed: %f (B/s)  (%f MB/s)\n", writeSpeed, writeSpeed/(1024*1024));
 
 

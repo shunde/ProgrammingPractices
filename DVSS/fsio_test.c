@@ -14,11 +14,12 @@ struct sstorage {
 };
 
 void usage(const char* fname) {
-    printf("[usage] %s <streamNums> \n", fname);
+    printf("[usage] %s <streamNums> <buf_bits>\n", fname);
 }
 
+
 int main(int argc, char* argv[]) {
-    if (argc < 2) {
+    if (argc < 3) {
         usage(argv[0]);
         return 0;
     }
@@ -59,11 +60,15 @@ int main(int argc, char* argv[]) {
     }
 
     // concurrent stream write
+    int buf_bits;
+    buf_bits = atoi(argv[2]);
     long long bytesWrite = 0;
-    int bufsize = 4 * 1024;  // 4KB
-    int loops = 600;
+    int bufsize = 1 << buf_bits;  
+    int file_size = 32 * 1024 * 1024;
+    int loops = file_size / bufsize;
     struct timeval t1, t2;
     double elapsedTime;
+    printf("buf size = %f KB\t file_size= %f MB\n", bufsize * 1.0 / 1024, file_size * 1.0 / (1024*1024));
 
     char *gop = (char*)malloc(sizeof(char) * bufsize);
     if (gop == NULL)
