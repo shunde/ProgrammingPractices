@@ -1,7 +1,8 @@
 class Solution {
 public:
     Solution(vector<int> nums) {
-    	original = nums;        
+    	original = nums;
+    	srand(time(NULL));        
     }
     
     /** Resets the array to its original configuration and return it. */
@@ -13,7 +14,8 @@ public:
     vector<int> shuffle() {
     	vector<int> perm(original.begin(), original.end());
     	for (int i = 1; i < perm.size(); ++i) {
-    		
+    		int idx = rand() % (i+1);
+    		swap(perm[i], perm[idx]);
     	}
     	return perm;        
     }

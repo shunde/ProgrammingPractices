@@ -36,6 +36,10 @@ public:
 			}
 		}
 
+		while (depth < depth_stack.size()) {
+			stack_sum -= depth_stack.top();
+			depth_stack.pop();
+		}
 		if (isfile) {
 			int path_len = stack_sum + depth + length;
 			if (path_len > longest_sofar)
@@ -44,3 +48,4 @@ public:
 		return longest_sofar;
 	}
 };
+
