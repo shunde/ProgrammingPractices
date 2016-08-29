@@ -1,9 +1,9 @@
 class Solution {
 private:
 	void do_calculate(stack<int> &operands, stack<char>& ops) {
-		int a = operands.top();
-		operands.pop();
 		int b = operands.top();
+		operands.pop();
+		int a = operands.top();
 		operands.pop();
 		char op = ops.top();
 		ops.pop();
