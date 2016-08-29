@@ -39,7 +39,7 @@ public:
 		for (; idx < s.length(); ) {
 			if (s[idx] >= '0' && s[idx] <= '9') {
 				int val = 0;
-				while (s[idx] >= '0' && s[idx] <= '9') {
+				while (idx < s.length && s[idx] >= '0' && s[idx] <= '9') {
 					val = val * 10 + s[idx] - '0';
 					++idx;
 				}
