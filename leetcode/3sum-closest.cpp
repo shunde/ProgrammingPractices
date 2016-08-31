@@ -3,6 +3,9 @@ public:
     int threeSumClosest(vector<int>& nums, int target) {
     	int minDiff = INT_MAX;
     	int result = 0;
+        
+        if (nums.size() < 3) return 0;
+
     	sort(nums.begin(), nums.end());
     	for (int i = 0; i < nums.size() - 2; i++) {
     		if (i != 0 && nums[i] == nums[i-1])
