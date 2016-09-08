@@ -7,7 +7,7 @@ class Solution {
 
  public:
   int maxProduct(vector<string>& words) {
-    if (words.empty()) return 0;
+    //if (words.empty()) return 0;
 
     vector<WordInfo> wordinfos;
     {
@@ -22,8 +22,8 @@ class Solution {
     }
 
     int result = 0;
-    for (int i = 0; i < (int)wordinfos.size() - 1; i++) {
-      for (int j = i + 1; j < (int)wordinfos.size(); j++) {
+    for (int i = 0; i < wordinfos.size(); i++) {
+      for (int j = i + 1; j < wordinfos.size(); j++) {
         if (!(wordinfos[i].bitset & wordinfos[j].bitset)) {
           result = max(result, wordinfos[i].len * wordinfos[j].len);
         }
