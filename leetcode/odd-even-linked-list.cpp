@@ -18,7 +18,7 @@ public:
             ListNode* pNode = head;
             head = head->next;
             pNode->next = NULL;
-            
+
             if (i & 0x01) {
                 if (oddTail) {
                     oddTail->next = pNode;
