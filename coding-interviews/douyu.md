@@ -7,11 +7,37 @@
 笔试题都很典型。
 
 1. C++中 `static`、`const`、`volatile`、`mutable` 的作用。
+
 2. 使用UDP如何知道数据报文已经被对方接收。
+
 3. N个数的数组的范围是1~N，判断是否有重复数字。
+
 4. 实现LRU。
+
+   参照 [LRU Cache -- Leetcode](https://leetcode.com/problems/lru-cache/) 的接口规范。
+
+   ```C++
+   /**
+    * 实现如下操作：get 和 set
+    * get(key) - Get the value of the key if it exists in cache, otherwise return -1.
+    * set(key, value) - Set or insert the value if the key is not already present.
+    * when the cache reached its capacity, 
+    * it should invalidate the least recently used item before inserting a new item.
+    */
+   Class LRUCache {
+   public:
+     LRUCache(int capacity) {}
+     int get(int key) {} 
+     void set(int key, int val) {}
+   };
+   ```
+
+   ​
+
 5. x64系统struct 结构体大小。注意**函数指针和long大小**。
+
 6. 排序算法的稳定性。
+
 7. fork创建子进程哪个不会被复制给子进程。
 
 
@@ -57,7 +83,25 @@
 
 2. 在浏览器地址栏输入 “baidu.com”  到显示出页面来的整个过程。
 
-3. 如何打印出DNS服务查找的过程。
+3. 如何打印出DNS查询过程？
+
+   DNS查询工具有：
+
+   - `nslookup`， 已被遗弃，很少使用。
+   - `dig`，灵活，功能强大。
+   - `host`，功能简单。
+
+   **跟踪 dig 全过程：**
+
+   ```shell
+   $ dig +trace roclinux.cn
+   ```
+
+   ​
+
+   ​
+
+   ​
 
 4. TCP 三次握手和四次挥手的状态转换图。accept 调用是在哪个阶段？
 
@@ -102,31 +146,51 @@
 
 9. `vector` 的 `reserve()` 方法和 `resize()` 方法的区别。
 
-   答：参考链接：[vector.resize() 与 vector.reserve() 的区别](http://blog.csdn.net/shuilan0066/article/details/3588478)
+   答：`std::vector::reserve(size_type n)` 请求 vector 容量（capacity）至少能够包含 n 个元素。
 
-   ​
+   如果 n 大于当前 vector 的容量，此方法会导致容器重新分配存储空间使容量增加到 n （或大于 n）；
 
-   ​
+   如果 n 小于等于当前 vector 的容量，该方法的调用什么都不做。
+   该方法对 vector 的 size 没有影响，也不能修改其中的元素。
 
-10. STL 迭代器的分类。
+   `std::vector::resize(size_type n, value_type val = value_type())` 重新调整容器大小，使之恰好包含 n 个元素。
+
+   如果 n 小于当前容器的 size，容器的前 n 个元素会被保留，后面的元素会被移除（和销毁）。
+
+   如果n 大于当前容器的 size，那么容器会通过在尾部插入足够的元素 val 使容器的 size 为 n。如果 指定了 val，则使用 val 初始化新插入的元素；如果没有指定，则调用默认的构造函数。
+
+   注意：此方法通过插入或移除其中的元素，确确实实修改了容器的内容。
+
+   参考链接：
+
+   1. [vector.resize() 与 vector.reserve() 的区别](http://blog.csdn.net/shuilan0066/article/details/3588478)
+   2. cplusplus.com [std::vector::resize](http://www.cplusplus.com/reference/vector/vector/resize/) 和 [std::vector::reserve](http://www.cplusplus.com/reference/vector/vector/reserve/)
+
+10. `vector` 的 `at()` 和 `operator[]` 的区别。
+
+   答：`at()` 和 `operator[]` 的作用相同。相比较 `operator[]` 而言，`at()` 会对边界范围进行检查，如果越界会抛出 `out_of_range` 异常。
+
+11. STL 迭代器的分类。
 
    答：根据移动性和施行操作，分为五类：
 
-   - Input Iterator，输入迭代器
-   - Output Iterator，输出迭代器
-   - Forward Iterator，前向迭代器
-   - Bidirectional Iterator，双向迭代器
-   - Random Access Iterator，随机访问迭代器
+- Input Iterator，输入迭代器
 
-11. Redis 各个数据结构对应的底层数据结构。
 
-12. 从源代码到生成可执行文件，经历了哪些步骤。
+- Output Iterator，输出迭代器
+- Forward Iterator，前向迭代器
+- Bidirectional Iterator，双向迭代器
+- Random Access Iterator，随机访问迭代器
+
+111. Redis 各个数据结构对应的底层数据结构。
+
+121. 从源代码到生成可执行文件，经历了哪些步骤。
 
    答：参考链接 [C/C++源代码到可执行程序的过程详解](http://www.jianshu.com/p/cdcaaed3a767)
 
    **源代码 --> 编译预处理 --> 编译 --> 优化 --> 汇编 --> 链接 --> 可执行文件**
 
-   1. 编译预处理
+1.    编译预处理
 
       读取C/C++源程序，对其中的伪指令（以#开头的指令）和特殊符号进行处理（替换）
 
@@ -138,11 +202,11 @@
 
       （4）特殊符号。如 `__LINE__` 、`__FILE__` 、`__DATE__`、`__FUNCTION__`等。
 
-   2. 编译阶段
+2.    编译阶段
 
-      通过词法和语法分析，将其翻译成等价的中间代码表示或汇编代码。
+         通过词法和语法分析，将其翻译成等价的中间代码表示或汇编代码。
 
-   3. 优化阶段
+3.    优化阶段
 
       优化有两种：（1）对中间代码的优化，不依赖于具体的计算机；（2）针对对目标代码生成的优化。
 
@@ -152,7 +216,7 @@
 
       经过优化的汇编代码必须经过汇编程序转换成相应的机器指令，方可能被机器执行。
 
-   4. 汇编过程。
+4.    汇编过程。
 
       将汇编语言代码翻译成目标的机器指令。
 
@@ -168,8 +232,8 @@
 
       汇编程序生成的实际上是第一种类型的目标文件。
 
-   5. 链接程序
+5.    链接程序
 
       （1）静态链接；（2）动态链接。
 
-   ​
+      ​
